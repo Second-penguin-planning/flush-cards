@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>みんなの日本語 フラッシュカード</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .category-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button.active {
+            background-color: #2c3e50;
+            font-weight: bold;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        /* フラッシュカードのスタイル */
+        .card-container {
+            width: 320px;
+            height: 220px;
+            perspective: 1000px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            font-size: 24px;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .card-front {
+            background-color: white;
+            color: #2c3e50;
+        }
+        .card-back {
+            background-color: #e8f6f3;
+            color: #16a085;
+            transform: rotateY(180deg);
+        }
+        .english-text {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+        
+        /* ナビゲーション */
+        .nav-buttons {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .counter {
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>みん日 フラッシュカード (〜13課)</h1>
+
+    <div class="category-buttons">
+        <button id="btn-words" class="active" onclick="setCategory('words')">単語</button>
+        <button id="btn-grammar" onclick="setCategory('grammar')">文法</button>
+        <button id="btn-kanji" onclick="setCategory('kanji')">漢字</button>
+    </div>
+
+    <div class="card-container" onclick="flipCard()">
+        <div class="card" id="flashcard">
+            <div class="card-face card-front">
+                <div id="card-front-text"></div>
+            </div>
+            <div class="card-face card-back">
+                <div id="card-back-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button id="btn-prev" onclick="prevCard()">◀ 前へ</button>
+        <div class="counter" id="card-counter">1 / 20</div>
+        <button id="btn-next" onclick="nextCard()">次へ ▶</button>
+    </div>
+
+    <script>
+        // 問題データ（13課までの内容・各20問）
+        const deck = {
+            // 単語（1〜13課の基本動詞など）
+            words: [
+                { front: "あそびます", back: "遊びます", english: "(play, enjoy oneself)" },
+                { front: "およぎます", back: "泳ぎます", english: "(swim)" },
+                { front: "むかえます", back: "迎えます", english: "(go to meet, welcome)" },
+                { front: "つかれます", back: "疲れます", english: "(get tired)" },
+                { front: "かいものします", back: "買い物します", english: "(do shopping)" },
+                { front: "たべます", back: "食べます", english: "(eat)" },
+                { front: "のみます", back: "飲みます", english: "(drink)" },
+                { front: "みます", back: "見ます", english: "(see, look at)" },
+                { front: "ききます", back: "聞きます", english: "(hear, listen)" },
+                { front: "よみます", back: "読みます", english: "(read)" },
+                { front: "かきます", back: "書きます", english: "(write)" },
+                { front: "かいます", back: "買います", english: "(buy)" },
+                { front: "あいます", back: "会います", english: "(meet)" },
+                { front: "いきます", back: "行きます", english: "(go)" },
+                { front: "きます", back: "来ます", english: "(come)" },
+                { front: "かえります", back: "帰ります", english: "(go home, return)" },
+                { front: "わかります", back: "分かります", english: "(understand)" },
+                { front: "あります", back: "有ります", english: "(exist, be - inanimate)" },
+                { front: "います", back: "居ます", english: "(exist, be - animate)" },
+                { front: "やすみます", back: "休みます", english: "(take a rest, take a holiday)" }
+            ],
+            // 13課までの文法（穴埋め形式）
+            grammar: [
+                { front: "車（　　） 欲しいです。", back: "が", english: "(I want a car.)" },
+                { front: "沖縄へ 行き（　　）です。", back: "たい", english: "(I want to go to Okinawa.)" },
+                { front: "神戸へ 買い物（　　） 行きます。", back: "に", english: "(I'm going shopping in Kobe.)" },
+                { front: "休みは （　　） 行きましたか。", back: "どこか[へ]", english: "(Did you go anywhere?)" },
+                { front: "（　　）注文は？", back: "ご", english: "(May I take your order?)" },
+                { front: "わたし（　　） マイク・ミラーです。", back: "は", english: "(I am Mike Miller.)" },
+                { front: "ミラーさんは 学生じゃ（　　）。", back: "ありません", english: "(Mr. Miller isn't a student.)" },
+                { front: "これ（　　） 辞書です。", back: "は", english: "(This is a dictionary.)" },
+                { front: "それは わたし（　　） 傘です。", back: "の", english: "(That's my umbrella.)" },
+                { front: "トイレは （　　）ですか。", back: "どこ", english: "(Where is the toilet?)" },
+                { front: "わたしは 毎朝 6時（　　） 起きます。", back: "に", english: "(I get up at six every morning.)" },
+                { front: "わたしは 電車（　　） 会社へ 行きます。", back: "で", english: "(I go to the office by train.)" },
+                { front: "わたしは 家族（　　） 日本へ 来ました。", back: "と", english: "(I came to Japan with my family.)" },
+                { front: "ジュース（　　） 飲みます。", back: "を", english: "(I drink juice.)" },
+                { front: "わたしは 木村さん（　　） 花を あげました。", back: "に", english: "(I gave Ms. Kimura some flowers.)" },
+                { front: "富士山は 高い（　　）。", back: "です", english: "(Mt. Fuji is high.)" },
+                { front: "日本の 食べ物は おいしいです（　　）、高いです。", back: "が", english: "(Japanese food is delicious, but it is expensive.)" },
+                { front: "わたしは イタリア料理（　　） 好きです。", back: "が", english: "(I like Italian food.)" },
+                { front: "時間が ありません（　　）、新聞を 読みません。", back: "から", english: "(I don't read newspapers because I don't have time.)" },
+                { front: "机の 上に 本（　　） ペンが あります。", back: "や", english: "(There are books and pens on the desk.)" }
+            ],
+            // 13課までの簡単な名詞の漢字
+            kanji: [
+                { front: "水", back: "みず", english: "(water)" },
+                { front: "本", back: "ほん", english: "(book)" },
+                { front: "車", back: "くるま", english: "(car)" },
+                { front: "肉", back: "にく", english: "(meat)" },
+                { front: "駅", back: "えき", english: "(station)" },
+                { front: "人", back: "ひと", english: "(person)" },
+                { front: "山", back: "やま", english: "(mountain)" },
+                { front: "町", back: "まち", english: "(town)" },
+                { front: "魚", back: "さかな", english: "(fish)" },
+                { front: "花", back: "はな", english: "(flower)" },
+                { front: "犬", back: "いぬ", english: "(dog)" },
+                { front: "猫", back: "ねこ", english: "(cat)" },
+                { front: "手", back: "て", english: "(hand)" },
+                { front: "紙", back: "かみ", english: "(paper)" },
+                { front: "金", back: "かね (お金)", english: "(money)" },
+                { front: "男", back: "おとこ", english: "(man)" },
+                { front: "女", back: "おんな", english: "(woman)" },
+                { front: "子", back: "こ (子ども)", english: "(child)" },
+                { front: "雨", back: "あめ", english: "(rain)" },
+                { front: "雪", back: "ゆき", english: "(snow)" }
+            ]
+        };
+
+        let currentCategory = 'words';
+        let currentIndex = 0;
+
+        function updateCard() {
+            const cardElement = document.getElementById('flashcard');
+            const data = deck[currentCategory][currentIndex];
+            
+            // 裏返っている場合は表面に戻す
+            cardElement.classList.remove('is-flipped');
+            
+            // テキストの更新（アニメーション完了後に書き換えるため少し遅延させる）
+            setTimeout(() => {
+                document.getElementById('card-front-text').innerHTML = data.front;
+                document.getElementById('card-back-text').innerHTML = 
+                    `${data.back}<br><span class="english-text">${data.english}</span>`;
+            }, 150);
+
+            // カウンターとボタンの更新
+            document.getElementById('card-counter').innerText = `${currentIndex + 1} / ${deck[currentCategory].length}`;
+            document.getElementById('btn-prev').disabled = currentIndex === 0;
+            document.getElementById('btn-next').disabled = currentIndex === deck[currentCategory].length - 1;
+        }
+
+        function setCategory(category) {
+            currentCategory = category;
+            currentIndex = 0;
+            
+            // ボタンのアクティブ状態を切り替え
+            document.getElementById('btn-words').classList.remove('active');
+            document.getElementById('btn-grammar').classList.remove('active');
+            document.getElementById('btn-kanji').classList.remove('active');
+            document.getElementById(`btn-${category}`).classList.add('active');
+            
+            updateCard();
+        }
+
+        function flipCard() {
+            const card = document.getElementById('flashcard');
+            card.classList.toggle('is-flipped');
+        }
+
+        function nextCard() {
+            if (currentIndex < deck[currentCategory].length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        // 初期化
+        updateCard();
+    </script>
+</body>
+</html>
