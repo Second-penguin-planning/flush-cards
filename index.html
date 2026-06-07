@@ -142,75 +142,9 @@
         // 問題データ（13課までの内容・各20問）
         // NOTION_SYNC_START
         const deck = {
-            // 単語（1〜13課の基本動詞など）
-            words: [
-                { front: "あそびます", back: "遊びます", english: "(play, enjoy oneself)" },
-                { front: "およぎます", back: "泳ぎます", english: "(swim)" },
-                { front: "むかえます", back: "迎えます", english: "(go to meet, welcome)" },
-                { front: "つかれます", back: "疲れます", english: "(get tired)" },
-                { front: "かいものします", back: "買い物します", english: "(do shopping)" },
-                { front: "たべます", back: "食べます", english: "(eat)" },
-                { front: "のみます", back: "飲みます", english: "(drink)" },
-                { front: "みます", back: "見ます", english: "(see, look at)" },
-                { front: "ききます", back: "聞きます", english: "(hear, listen)" },
-                { front: "よみます", back: "読みます", english: "(read)" },
-                { front: "かきます", back: "書きます", english: "(write)" },
-                { front: "かいます", back: "買います", english: "(buy)" },
-                { front: "あいます", back: "会います", english: "(meet)" },
-                { front: "いきます", back: "行きます", english: "(go)" },
-                { front: "きます", back: "来ます", english: "(come)" },
-                { front: "かえります", back: "帰ります", english: "(go home, return)" },
-                { front: "わかります", back: "分かります", english: "(understand)" },
-                { front: "あります", back: "有ります", english: "(exist, be - inanimate)" },
-                { front: "います", back: "居ます", english: "(exist, be - animate)" },
-                { front: "やすみます", back: "休みます", english: "(take a rest, take a holiday)" }
-            ],
-            // 13課までの文法（穴埋め形式）
-            grammar: [
-                { front: "車（くるま）（　　） 欲しいです。", back: "が", english: "(I want a car.)" },
-                { front: "沖縄（おきなわ）へ 行き（　　）です。", back: "たい", english: "(I want to go to Okinawa.)" },
-                { front: "神戸（こうべ）へ 買い物（　　） 行きます。", back: "に", english: "(I'm going shopping in Kobe.)" },
-                { front: "休み（やすみ）は （　　） 行きましたか。", back: "どこか[へ]", english: "(Did you go anywhere?)" },
-                { front: "（　　）注文（ちゅうもん）は？", back: "ご", english: "(May I take your order?)" },
-                { front: "わたし（　　） マイク・ミラーです。", back: "は", english: "(I am Mike Miller.)" },
-                { front: "ミラーさんは 学生（がくせい）じゃ（　　）。", back: "ありません", english: "(Mr. Miller isn't a student.)" },
-                { front: "これ（　　） 辞書（じしょ）です。", back: "は", english: "(This is a dictionary.)" },
-                { front: "それは わたし（　　） 傘（かさ）です。", back: "の", english: "(That's my umbrella.)" },
-                { front: "トイレは （　　）ですか。", back: "どこ", english: "(Where is the toilet?)" },
-                { front: "わたしは 毎朝（まいあさ） 6時（　　） 起きます（おきます）。", back: "に", english: "(I get up at six every morning.)" },
-                { front: "わたしは 電車（でんしゃ）（　　） 会社（かいしゃ）へ 行きます。", back: "で", english: "(I go to the office by train.)" },
-                { front: "わたしは 家族（かぞく）（　　） 日本（にほん）へ 来ました。", back: "と", english: "(I came to Japan with my family.)" },
-                { front: "ジュース（　　） 飲みます（のみます）。", back: "を", english: "(I drink juice.)" },
-                { front: "わたしは 木村（きむら）さん（　　） 花（はな）を あげました。", back: "に", english: "(I gave Ms. Kimura some flowers.)" },
-                { front: "富士山（ふじさん）は 高い（たかい）（　　）。", back: "です", english: "(Mt. Fuji is high.)" },
-                { front: "日本（にほん）の 食べ物（たべもの）は おいしいです（　　）、高いです（たかいです）。", back: "が", english: "(Japanese food is delicious, but it is expensive.)" },
-                { front: "わたしは イタリア料理（りょうり）（　　） 好きです（すきです）。", back: "が", english: "(I like Italian food.)" },
-                { front: "時間（じかん）が ありません（　　）、新聞（しんぶん）を 読みません。", back: "から", english: "(I don't read newspapers because I don't have time.)" },
-                { front: "机（つくえ）の 上（うえ）に 本（ほん）（　　） ペンが あります。", back: "や", english: "(There are books and pens on the desk.)" }
-            ],
-            // 13課までの簡単な名詞の漢字
-            kanji: [
-                { front: "水", back: "みず", english: "(water)" },
-                { front: "本", back: "ほん", english: "(book)" },
-                { front: "車", back: "くるま", english: "(car)" },
-                { front: "肉", back: "にく", english: "(meat)" },
-                { front: "駅", back: "えき", english: "(station)" },
-                { front: "人", back: "ひと", english: "(person)" },
-                { front: "山", back: "やま", english: "(mountain)" },
-                { front: "町", back: "まち", english: "(town)" },
-                { front: "魚", back: "さかな", english: "(fish)" },
-                { front: "花", back: "はな", english: "(flower)" },
-                { front: "犬", back: "いぬ", english: "(dog)" },
-                { front: "猫", back: "ねこ", english: "(cat)" },
-                { front: "手", back: "て", english: "(hand)" },
-                { front: "紙", back: "かみ", english: "(paper)" },
-                { front: "金", back: "かね (お金)", english: "(money)" },
-                { front: "男", back: "おとこ", english: "(man)" },
-                { front: "女", back: "おんな", english: "(woman)" },
-                { front: "子", back: "こ (子ども)", english: "(child)" },
-                { front: "雨", back: "あめ", english: "(rain)" },
-                { front: "雪", back: "ゆき", english: "(snow)" }
-            ]
+                  words: [],
+                  grammar: [],
+                  kanji: []
         };
         // NOTION_SYNC_END
 
