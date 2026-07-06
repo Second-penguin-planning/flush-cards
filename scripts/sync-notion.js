@@ -83,14 +83,18 @@ async function main() {
   const deck = buildDeck(cards);
   console.log(`単語: ${deck.words.length}件, 文法: ${deck.grammar.length}件, 漢字: ${deck.kanji.length}件`);
 
+  // NOTION_SYNC_START〜END は index.html 内の deck["13"] の中身だけを差し替える
+  // （deck["29"] など他の課はここでは触らない）
   const deckJson = JSON.stringify(deck, null, 12)
     .replace(/"([^"]+)":/g, '$1:')  // キーのクォートを外す
+    .replace(/^{\n/, '')
+    .replace(/\n}$/, '')
     .split('\n').map((l, i) => i === 0 ? l : '        ' + l).join('\n');
 
   const html = fs.readFileSync('index.html', 'utf8');
   const updated = html.replace(
     /\/\/ NOTION_SYNC_START[\s\S]*?\/\/ NOTION_SYNC_END/,
-    `// NOTION_SYNC_START\n        const deck = ${deckJson};\n        // NOTION_SYNC_END`
+    `// NOTION_SYNC_START（Notionと同期されるのは〜13課のみ）\n        ${deckJson}\n        // NOTION_SYNC_END`
   );
 
   if (html === updated) {

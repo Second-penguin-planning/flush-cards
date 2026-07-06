@@ -109,39 +109,78 @@
             font-size: 29px;
             font-weight: bold;
         }
+
+        /* 課選択画面 */
+        .lesson-buttons button {
+            padding: 20px 40px;
+            font-size: 20px;
+        }
+        .back-button {
+            align-self: flex-start;
+            background-color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        .back-button:hover {
+            background-color: #626d6e;
+        }
+        #flashcard-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        #lesson-title {
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
 
-    <h1>みん日 フラッシュカード (〜13課)</h1>
+    <h1>みん日 フラッシュカード</h1>
 
-    <div class="category-buttons">
-        <button id="btn-words" class="active" onclick="setCategory('words')">単語</button>
-        <button id="btn-grammar" onclick="setCategory('grammar')">文法</button>
-        <button id="btn-kanji" onclick="setCategory('kanji')">漢字</button>
+    <div id="lesson-select-screen" class="category-buttons lesson-buttons">
+        <button onclick="selectLesson('13')">〜13課</button>
+        <button onclick="selectLesson('29')">29課</button>
     </div>
 
-    <div class="card-container" onclick="flipCard()">
-        <div class="card" id="flashcard">
-            <div class="card-face card-front">
-                <div id="card-front-text"></div>
+    <div id="flashcard-screen" style="display: none;">
+        <button class="back-button" onclick="showLessonSelect()">← 課選択に戻る</button>
+        <h2 id="lesson-title"></h2>
+
+        <div class="category-buttons">
+            <button id="btn-words" class="active" onclick="setCategory('words')">単語</button>
+            <button id="btn-grammar" onclick="setCategory('grammar')">文法</button>
+            <button id="btn-kanji" onclick="setCategory('kanji')">漢字</button>
+        </div>
+
+        <div class="card-container" onclick="flipCard()">
+            <div class="card" id="flashcard">
+                <div class="card-face card-front">
+                    <div id="card-front-text"></div>
+                </div>
+                <div class="card-face card-back">
+                    <div id="card-back-text"></div>
+                </div>
             </div>
-            <div class="card-face card-back">
-                <div id="card-back-text"></div>
-            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button id="btn-prev" onclick="prevCard()">◀ 前へ</button>
+            <div class="counter" id="card-counter">1 / 20</div>
+            <button id="btn-next" onclick="nextCard()">次へ ▶</button>
         </div>
     </div>
 
-    <div class="nav-buttons">
-        <button id="btn-prev" onclick="prevCard()">◀ 前へ</button>
-        <div class="counter" id="card-counter">1 / 20</div>
-        <button id="btn-next" onclick="nextCard()">次へ ▶</button>
-    </div>
-
     <script>
-        // 問題データ（13課までの内容・各20問）
-        // NOTION_SYNC_START
+        // 課ごとのカードデータ
+        const lessonLabels = {
+            "13": "〜13課",
+            "29": "29課"
+        };
+
         const deck = {
+        "13": {
+        // NOTION_SYNC_START（Notionと同期されるのは〜13課のみ）
                   words: [
                             {
                                       front: "やすみます",
@@ -353,66 +392,6 @@
                   ],
                   kanji: [
                             {
-                                      front: "小さい",
-                                      back: "ちいさい",
-                                      english: "(small)"
-                            },
-                            {
-                                      front: "半分",
-                                      back: "はんぶん",
-                                      english: "(half)"
-                            },
-                            {
-                                      front: "大切",
-                                      back: "たいせつ",
-                                      english: "(important)"
-                            },
-                            {
-                                      front: "軽い",
-                                      back: "かるい",
-                                      english: "(light)"
-                            },
-                            {
-                                      front: "太っています",
-                                      back: "ふとっています",
-                                      english: "(is overweight)"
-                            },
-                            {
-                                      front: "女の人",
-                                      back: "おんなのひと",
-                                      english: "(woman)"
-                            },
-                            {
-                                      front: "男の人",
-                                      back: "おとこのひと",
-                                      english: "(man)"
-                            },
-                            {
-                                      front: "去年",
-                                      back: "きょねん",
-                                      english: "(last year)"
-                            },
-                            {
-                                      front: "今年",
-                                      back: "ことし",
-                                      english: "(this year)"
-                            },
-                            {
-                                      front: "高い",
-                                      back: "たかい",
-                                      english: "(high / expensive)"
-                            },
-                            {
-                                      front: "少し",
-                                      back: "すこし",
-                                      english: "(a little)"
-                            },
-                            {
-                                      front: "問題",
-                                      back: "もんだい",
-                                      english: "(problem)"
-                            },
-                            {
                                       front: "今日",
                                       back: "きょう",
                                       english: "(today)"
@@ -518,42 +497,134 @@
                                       english: "(water)"
                             }
                   ]
-        };
         // NOTION_SYNC_END
+        },
+        "29": {
+            words: [
+                { front: "[ドアが]あきます", back: "[ドアが]開（あ）きます", english: "([a door] open)" },
+                { front: "[ドアが]しまります", back: "[ドアが]閉（し）まります", english: "([a door] close, shut)" },
+                { front: "[でんきが]つきます", back: "[電気（でんき）が]つきます", english: "([a light] come on)" },
+                { front: "[でんきが]きえます", back: "[電気（でんき）が]消（き）えます", english: "([a light] go off)" },
+                { front: "[いすが]こわれます", back: "[いすが]壊（こわ）れます", english: "([a chair] break)" },
+                { front: "[コップが]われます", back: "[コップが]割（わ）れます", english: "([a glass] break, smash)" },
+                { front: "[きが]おれます", back: "[木（き）が]折（お）れます", english: "([a tree] break, snap)" },
+                { front: "[かみが]やぶれます", back: "[紙（かみ）が]破（やぶ）れます", english: "([paper] tear)" },
+                { front: "[ふくが]よごれます", back: "[服（ふく）が]汚（よご）れます", english: "([clothes] get dirty)" },
+                { front: "[ボタンが]はずれます", back: "[ボタンが]外（はず）れます", english: "([a button] be undone)" },
+                { front: "[くるまが]とまります", back: "[車（くるま）が]止（と）まります", english: "([a car] stop, park)" },
+                { front: "まちがえます", back: "間違（まちが）えます", english: "(make a mistake)" },
+                { front: "おとします", back: "落（お）とします", english: "(drop, lose)" },
+                { front: "[かぎが]かかります", back: "[かぎが]掛（か）かります", english: "(be locked)" },
+                { front: "ふきます", back: "ふきます", english: "(wipe)" },
+                { front: "とりかえます", back: "取（と）り替（か）えます", english: "(change)" },
+                { front: "かたづけます", back: "片（かた）づけます", english: "(put (things) in order, tidy up)" },
+                { front: "えきいん", back: "駅員（えきいん）", english: "(station attendant)" },
+                { front: "こうばん", back: "交番（こうばん）", english: "(police box)" },
+                { front: "じしん", back: "地震（じしん）", english: "(earthquake)" }
+            ],
+            grammar: [
+                { front: "窓（まど）が（　　）。", back: "割（わ）れています", english: "(The window is broken.)" },
+                { front: "電気（でんき）が（　　）。", back: "ついています", english: "(The light is on.)" },
+                { front: "このいすは（　　）。", back: "壊（こわ）れています", english: "(This chair is broken.)" },
+                { front: "会議室（かいぎしつ）の鍵（かぎ）が（　　）ね。", back: "掛（か）かっています", english: "(The meeting room's locked, isn't it?)" },
+                { front: "シュミットさんが持（も）って来（き）たワインはどこですか。 ――みんなで（　　）。", back: "飲（の）んでしまいました", english: "(We drank it all.)" },
+                { front: "このパソコン、使（つか）ってもいいですか。 ――それは（　　）から、あちらのを使（つか）ってください。", back: "故障（こしょう）しています", english: "(That one's broken)" },
+                { front: "タクシーに荷物（にもつ）を（　　）。", back: "忘（わす）れてしまったんです", english: "(I left my luggage in the taxi.)" },
+                { front: "道（みち）を（　　）。", back: "まちがえたんです", english: "(I took the wrong turning.)" },
+                { front: "漢字（かんじ）の宿題（しゅくだい）はもう（　　）。", back: "やってしまいました", english: "(I've already completed my kanji homework.)" },
+                { front: "昼（ひる）ごはんまでにレポートを（　　）。", back: "書（か）いてしまいます", english: "(I'll finish writing my report by lunchtime.)" },
+                { front: "パスポートを（　　）。", back: "なくしてしまいました", english: "(I went and lost my passport.)" },
+                { front: "パソコンが（　　）。", back: "故障（こしょう）してしまいました", english: "(My PC went and broke down.)" },
+                { front: "どこかで財布（さいふ）を（　　）。", back: "落（お）としてしまったんです", english: "(I've gone and dropped my wallet somewhere.)" },
+                { front: "すぐ交番（こうばん）（　　）行（い）かないと。", back: "に", english: "(particle indicating arrival point)" },
+                { front: "（　　）はおめでとうございます。", back: "それ", english: "(Congratulations on that)" },
+                { front: "途中（とちゅう）でやめたい場合（ばあい）は？ ――（　　）場合（ばあい）は、係員（かかりいん）に言（い）ってください。", back: "その", english: "(In that case)" },
+                { front: "休（やす）んだほうがいいですよ。 ――ええ、（　　）します。", back: "そう", english: "(Yes, I will do that.)" },
+                { front: "あ、かばんが（　　）よ。", back: "ありました", english: "(Oh, your bag is found/here it is!)" },
+                { front: "どこか（　　）電話（でんわ）がありますか。", back: "に", english: "(Is there a telephone somewhere around here?)" },
+                { front: "この袋（ふくろ）は（　　）いますから、捨（す）てましょう。", back: "破（やぶ）れて", english: "(This bag is torn)" },
+                { front: "そのコップは（　　）いますよ。きれいなコップはあちらです。", back: "汚（よご）れて", english: "(That glass is dirty)" },
+                { front: "約束（やくそく）の時間（じかん）に（　　）。", back: "遅（おく）れてしまいました", english: "(Were you on time? -> No, I was late.)" },
+                { front: "切符（きっぷ）を買（か）いましたが、（　　）。", back: "なくしてしまいました", english: "(I bought a ticket but I went and lost it.)" },
+                { front: "大学（だいがく）でタイ語（ご）を習（なら）いましたが、もう（　　）。", back: "忘（わす）れてしまいました", english: "(I learned Thai at university but I went and forgot it.)" },
+                { front: "ボタンが（　　）。", back: "外（はず）れています", english: "(The button is undone.)" },
+                { front: "エアコンが（　　）いますから、涼（すず）しいです。", back: "ついて", english: "(The AC is on)" },
+                { front: "会議室（かいぎしつ）の電気（でんき）が（　　）いますから、会議（かいぎ）はもう終（お）わったと思（おも）います。", back: "消（き）えて", english: "(The meeting room's light is off)" },
+                { front: "ドアが（　　）いますから、閉（し）めてください。", back: "開（あ）いて", english: "(The door is open)" },
+                { front: "このコートはポケットが（　　）いませんから、不便（ふべん）です。", back: "付（つ）いて", english: "(This coat doesn't have pockets attached)" },
+                { front: "ワインはありますか。 ――いいえ、もう（　　）。", back: "飲（の）んでしまいました", english: "(No, we already drank it all up.)" },
+                { front: "それは図書館（としょかん）の本（ほん）ですか。 ――ええ、全部（ぜんぶ）（　　）から、返（かえ）しに行（い）きます。", back: "読（よ）んでしまいました", english: "(Yes, I finished reading it all)" },
+                { front: "一緒（いっしょ）に帰（かえ）りませんか。 ――このメールを（　　）から、お先（さき）にどうぞ。", back: "書（か）いてしまいます", english: "(I will finish writing this email)" },
+                { front: "駅（えき）の建（たて）物（もの）は（　　）、壁（かべ）の時計（とけい）は止（と）まっています。", back: "壊（こわ）れて", english: "(The station building is broken)" },
+                { front: "古（ふる）いビルが駅前（えきまえ）の広（ひろ）い道（みち）に（　　）。", back: "倒（たお）れています", english: "(An old building has fallen down)" },
+                { front: "駅（えき）の西（にし）の方（ほう）では今（いま）もうちが（　　）。", back: "燃（も）えています", english: "(Houses are burning)" }
+            ],
+            kanji: [
+                { front: "袋", back: "ふくろ", english: "(bag)" },
+                { front: "書類", back: "しょるい", english: "(document)" },
+                { front: "枝", back: "えだ", english: "(branch)" },
+                { front: "返事", back: "へんじ", english: "(reply)" },
+                { front: "壁", back: "かべ", english: "(wall)" }
+            ]
+        }
+        };
 
+        let currentLesson = null;
         let currentCategory = 'words';
         let currentIndex = 0;
 
+        function selectLesson(lessonId) {
+            currentLesson = lessonId;
+            currentCategory = 'words';
+            currentIndex = 0;
+
+            document.getElementById('lesson-select-screen').style.display = 'none';
+            document.getElementById('flashcard-screen').style.display = 'flex';
+            document.getElementById('lesson-title').innerText = lessonLabels[lessonId];
+
+            document.getElementById('btn-words').classList.add('active');
+            document.getElementById('btn-grammar').classList.remove('active');
+            document.getElementById('btn-kanji').classList.remove('active');
+
+            updateCard();
+        }
+
+        function showLessonSelect() {
+            document.getElementById('flashcard-screen').style.display = 'none';
+            document.getElementById('lesson-select-screen').style.display = 'flex';
+            currentLesson = null;
+        }
+
         function updateCard() {
             const cardElement = document.getElementById('flashcard');
-            const data = deck[currentCategory][currentIndex];
-            
+            const data = deck[currentLesson][currentCategory][currentIndex];
+
             // 裏返っている場合は表面に戻す
             cardElement.classList.remove('is-flipped');
-            
+
             // テキストの更新（アニメーション完了後に書き換えるため少し遅延させる）
             setTimeout(() => {
                 document.getElementById('card-front-text').innerHTML = data.front;
-                document.getElementById('card-back-text').innerHTML = 
+                document.getElementById('card-back-text').innerHTML =
                     `${data.back}<br><span class="english-text">${data.english}</span>`;
             }, 150);
 
             // カウンターとボタンの更新
-            document.getElementById('card-counter').innerText = `${currentIndex + 1} / ${deck[currentCategory].length}`;
+            document.getElementById('card-counter').innerText = `${currentIndex + 1} / ${deck[currentLesson][currentCategory].length}`;
             document.getElementById('btn-prev').disabled = currentIndex === 0;
-            document.getElementById('btn-next').disabled = currentIndex === deck[currentCategory].length - 1;
+            document.getElementById('btn-next').disabled = currentIndex === deck[currentLesson][currentCategory].length - 1;
         }
 
         function setCategory(category) {
             currentCategory = category;
             currentIndex = 0;
-            
+
             // ボタンのアクティブ状態を切り替え
             document.getElementById('btn-words').classList.remove('active');
             document.getElementById('btn-grammar').classList.remove('active');
             document.getElementById('btn-kanji').classList.remove('active');
             document.getElementById(`btn-${category}`).classList.add('active');
-            
+
             updateCard();
         }
 
@@ -563,7 +634,7 @@
         }
 
         function nextCard() {
-            if (currentIndex < deck[currentCategory].length - 1) {
+            if (currentIndex < deck[currentLesson][currentCategory].length - 1) {
                 currentIndex++;
                 updateCard();
             }
@@ -575,9 +646,6 @@
                 updateCard();
             }
         }
-
-        // 初期化
-        updateCard();
     </script>
 </body>
 </html>
